@@ -244,6 +244,41 @@ pub(crate) struct Ruleset {
     pub(super) transitions: PropertiesHashMap<TransitionOptions>,
 }
 
+impl Ruleset {
+    pub(crate) fn clear(&mut self) {
+        self.vars.clear();
+        self.properties.clear();
+        self.animations.clear();
+        self.transitions.clear();
+    }
+
+    pub(crate) fn remove_property(
+        &mut self,
+        property: impl Into<ComponentPropertyRef>,
+        property_registry: &PropertyRegistry,
+    ) {
+        let property = property.into();
+        self.properties
+            .retain(move |ruleset_property| match ruleset_property {
+                &RulesetProperty::Specific { property_id, .. } => {
+                    match property_registry.resolve(&property) {
+                        Ok(id) => id != property_id,
+                        _ => true,
+                    }
+                }
+                RulesetProperty::Dynamic { css_name, .. } => {
+                    match (
+                        property_registry.get_property_id_by_css_name(&css_name),
+                        property_registry.resolve(&property),
+                    ) {
+                        (Some(css_id), Ok(id)) => id != css_id,
+                        _ => true,
+                    }
+                }
+            });
+    }
+}
+
 /// ID of a ruleset in a [`StyleSheet`].
 #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Hash, Debug, Reflect)]
 pub(crate) struct StyleSheetRulesetId(pub(crate) usize);
