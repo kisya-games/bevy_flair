@@ -665,12 +665,12 @@ pub(crate) struct CssPropertyParser<'a> {
 }
 
 #[derive(Clone)]
-struct CssParserContext<'a, 'i> {
-    property_parser: CssPropertyParser<'a>,
-    declared_animations: Rc<RefCell<FxHashSet<CowRcStr<'i>>>>,
-    imports: &'a FxHashMap<String, StyleSheet>,
-    media_selectors: MediaSelectors,
-    current_layer: String,
+pub(crate) struct CssParserContext<'a, 'i> {
+    pub(crate) property_parser: CssPropertyParser<'a>,
+    pub(crate) declared_animations: Rc<RefCell<FxHashSet<CowRcStr<'i>>>>,
+    pub(crate) imports: &'a FxHashMap<String, StyleSheet>,
+    pub(crate) media_selectors: MediaSelectors,
+    pub(crate) current_layer: String,
 }
 
 impl CssPropertyParser<'_> {
@@ -884,11 +884,11 @@ where
 /// ```css
 ///    width: 3px;
 /// ```
-struct CssRulesetBodyParser<'a, 'i> {
-    inner: CssParserContext<'a, 'i>,
-    parse_transition: bool,
-    parse_animation: bool,
-    parse_nested: bool,
+pub(crate) struct CssRulesetBodyParser<'a, 'i> {
+    pub(crate) inner: CssParserContext<'a, 'i>,
+    pub(crate) parse_transition: bool,
+    pub(crate) parse_animation: bool,
+    pub(crate) parse_nested: bool,
 }
 
 impl<'i> AtRuleParser<'i> for CssRulesetBodyParser<'_, 'i> {
@@ -1210,7 +1210,7 @@ struct CssStyleSheetParser<'a, 'i> {
 }
 
 #[derive(Debug)]
-enum AtRuleType<'i> {
+pub(crate) enum AtRuleType<'i> {
     FontFace,
     KeyFrames(CowRcStr<'i>),
     Import(CowRcStr<'i>, Option<String>),

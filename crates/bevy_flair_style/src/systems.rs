@@ -775,6 +775,7 @@ pub(crate) fn calculate_style_and_set_vars(
             &NodeStyleData,
             &mut NodeStyleActiveRules,
             &NodeStyleMarker,
+            Option<&RawInlineStyle>,
             // TextSpan does not have ComputedUiTargetCamera or ComputedUiRenderTargetInfo
             Option<&ComputedUiTargetCamera>,
             Option<&ComputedUiRenderTargetInfo>,
@@ -797,6 +798,7 @@ pub(crate) fn calculate_style_and_set_vars(
             data,
             mut active_rules,
             marker,
+            raw_inline_style,
             maybe_computed_ui_target_camera,
             maybe_computed_ui_render_target_info,
             mut vars,
@@ -824,7 +826,10 @@ pub(crate) fn calculate_style_and_set_vars(
             let new_rules =
                 style_sheet.get_matching_ruleset_ids_for_element(&element_ref, &media_provider);
 
-            let new_vars = style_sheet.get_vars(&new_rules);
+            let mut new_vars = style_sheet.get_vars(&new_rules);
+            if let Some(raw_inline_style) = raw_inline_style {
+                new_vars.extend(raw_inline_style.get_vars());
+            }
 
             if vars.replace_vars(new_vars) {
                 trace!("Setting vars on '{name_or_entity}': {:?}", &**vars);
@@ -896,7 +901,7 @@ pub(crate) fn set_property_values(
 
             // Inline styles
             if let Some(inline_style) = inline_style {
-                inline_style.to_output(
+                inline_style.get_property_values(
                     &property_registry,
                     &var_resolver.resolver_for_entity(name_or_entity.entity),
                     &mut property_values,
